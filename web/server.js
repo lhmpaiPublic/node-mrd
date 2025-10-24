@@ -77,6 +77,33 @@ async function init() {
     }
   });
 
+  app.get("/add-user", async (req, res) => {
+    try {
+      const { name } = req.query;
+
+      // name 파라미터 확인
+      if (!name || name.trim() === "") {
+        return res.status(400).json({ error: "name parameter is required" });
+      }
+
+      // 사용자 추가 (id 자동증가, created_at은 디폴트값)
+      const [result] = await pool.query("INSERT INTO users (name) VALUES (?)", [
+        name,
+      ]);
+
+      // 삽입된 사용자 정보 조회
+      const [rows] = await pool.query(
+        "SELECT id, name, created_at FROM users WHERE id = ?",
+        [result.insertId]
+      );
+
+      res.status(201).json(rows[0]);
+    } catch (e) {
+      console.error(e);
+      res.status(500).send(`User insert failed: ${e.message}`);
+    }
+  });
+
   app.get("/redis-get", async (req, res) => {
     try {
       const key = req.query.key || "color";

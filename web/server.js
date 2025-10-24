@@ -126,6 +126,17 @@ async function init() {
     }
   });
 
+  app.get("/redis-incr-get", async (req, res) => {
+    try {
+      const key = req.query.key || "visits";
+      const value = await redisClient.get(key);
+      res.send(`Redis incr ${key}=${value}`);
+    } catch (e) {
+      console.error(e);
+      res.status(500).send(`Redis GET failed: ${e.message}`);
+    }
+  });
+
   app.listen(Number(PORT), () => {
     console.log(`Server listening on port ${PORT}`);
   });
